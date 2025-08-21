@@ -34,7 +34,7 @@ maze = [
 
 rows, cols = len(maze), len(maze[0])
 
-def find_start():
+def find_playerstart():
     return next(((y, x) for y in range(rows) for x in range(cols) if maze[y][x] == -1), None)
 
 def find_goal():
@@ -65,7 +65,7 @@ def print_path(path):
 
 # Breadth First-Search
 def bfs():
-    start, goal = find_start(), find_goal()
+    start, goal = find_playerstart(), find_goal()
     queue, visited = deque([(start, [start])]), set()
     steps = 0
     while queue:
@@ -81,7 +81,7 @@ def bfs():
 
 # Depth First Search
 def dfs():
-    start, goal = find_start(), find_goal()
+    start, goal = find_playerstart(), find_goal()
     stack, visited = [(start, [start])], set()
     steps = 0
     while stack:
@@ -97,7 +97,7 @@ def dfs():
 
 # Greedy Best-First Search
 def greedy():
-    start, goal = find_start(), find_goal()
+    start, goal = find_playerstart(), find_goal()
     heap, visited = [(heuristic(start, goal), start, [start])], set()
     steps = 0
     while heap:
@@ -114,7 +114,7 @@ def greedy():
 # Dijkstra's Algorithm. I added this simply because I like the name and it's referenced in
 # Artifical Intelligence: A Modern Approach
 def dijkstra():
-    start, goal = find_start(), find_goal()
+    start, goal = find_playerstart(), find_goal()
     heap, visited = [(0, start, [start])], set()
     steps = 0
     while heap:
@@ -130,7 +130,7 @@ def dijkstra():
 
 # A* Search
 def astar():
-    start, goal = find_start(), find_goal()
+    start, goal = find_playerstart(), find_goal()
     heap, visited = [(heuristic(start, goal), 0, start, [start])], set()
     while heap:
         est, cost, current, path = heapq.heappop(heap)
@@ -148,7 +148,7 @@ def iddfs():
     goal = find_goal()
     for depth in range(1, 1000):
         visited = set()
-        result = dls(find_start(), goal, depth, [find_start()], visited, 0)
+        result = dls(find_playerstart(), goal, depth, [find_playerstart()], visited, 0)
         if result is not None:
             return result[0], result[1], len(visited)
     return None, 0, 0
@@ -195,6 +195,10 @@ def run_all():
         norm_steps = steps / max_steps if max_steps else 0
         norm_explored = explored / max_explored if max_explored else 0
 
+        # I didn't originally have weighting but found quickly that not opting for weighting
+        # with these metrics didn't really give an honest "most optimal algorithm" result.
+        # By adding weight and normalising that to the metrics below, we can gauge
+        # which algorithm is the most efficient at getting the player to the goal state.
         score = (0.5 * norm_path) + (0.2 * norm_steps) + (0.3 * norm_explored)
         scored_results.append((name, path_len, steps, explored, score))
 
@@ -242,7 +246,7 @@ if __name__ == '__main__':
     elif choice == '6': name, func = "IDDFS", iddfs
     elif choice == '7': run_all(); exit()
     else: name, func = "BFS", bfs
-    print(f"\nRunning {name}...")
+    print(Fore.BLUE + f"\nRunning {name}...\n")
     start = time.time()
     path, steps, explored = func()
     if path:
